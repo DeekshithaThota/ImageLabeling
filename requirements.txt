@@ -4,4 +4,4 @@ open_clip_torch
 Pillow
 pandas
 altair
-ultralytics
+
