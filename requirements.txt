@@ -2,3 +2,6 @@ streamlit
 torch
 open_clip_torch
 Pillow
+altair
+pandas
+
