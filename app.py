@@ -6,52 +6,51 @@ from datetime import datetime
 from utils import load_model, compute_similarity
 import pandas as pd
 import altair as alt
-from ultralytics import YOLO  # New import for YOLOv11
 
-st.set_page_config(page_title="OpenCLIP + YOLOv11 App", layout="wide")
+st.set_page_config(page_title="OpenCLIP Similarity App", layout="wide")
 
 @st.cache_resource(show_spinner="Loading OpenCLIP model...")
-def get_cached_clip_model():
+def get_cached_model():
     return load_model()
 
-@st.cache_resource(show_spinner="Loading YOLOv11 model...")
-def get_yolo_model():
-    return YOLO("best.pt")  # Make sure best.pt is in your project folder
+model, preprocess, tokenizer = get_cached_model()
 
-clip_model, preprocess, tokenizer = get_cached_clip_model()
-yolo_model = get_yolo_model()
-
+# Load labels
 with open("labels.txt", "r") as f:
     label_prompts = [line.strip() for line in f.readlines()]
 
-st.title("🧠 Image Understanding: OpenCLIP + YOLOv11")
+st.title("🔍 Image and Text Similarity using OpenCLIP")
 
-uploaded_file = st.file_uploader("📤 Upload an image", type=["png", "jpg", "jpeg"])
+uploaded_file = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
 
 if uploaded_file:
     image = Image.open(uploaded_file).convert("RGB")
-    col1, col2 = st.columns([1, 2])
+    # Display image and prediction side by side
+    col1, col2 = st.columns([1, 2])  # You can adjust the ratio as needed
     
     with col1:
         img_width = st.slider("🔧 Adjust image width", 100, 400, 250)
         st.image(image, caption="Uploaded Image", width=img_width)
 
     with col2:
-        # --- OpenCLIP Prediction ---
-        similarities = compute_similarity(image, label_prompts, clip_model, preprocess, tokenizer)
-        top_idx = similarities.argmax().item()
+        similarities = compute_similarity(image, label_prompts, model, preprocess, tokenizer)
+        top_idx = similarities.argmax().item()  # ✅ convert to plain int
         predicted_label = label_prompts[top_idx]
+    
+        
+    
         confidence_score = similarities[top_idx].item()
-
-        st.markdown("### 🔍 OpenCLIP Prediction:")
+    
+        st.markdown("### 🔍 Predicted Label:")
         st.markdown(
             f"<div style='background-color:#DFF0D8;padding:10px;border-radius:10px;font-size:20px'>"
             f"<b>{predicted_label}</b> (Confidence: {confidence_score:.2f})"
             f"</div>",
             unsafe_allow_html=True
         )
-
+    
         with st.expander("📊 Show All Similarity Scores"):
+            # Sort similarities descending
             score_data = list(zip(label_prompts, similarities.tolist()))
             score_data.sort(key=lambda x: x[1], reverse=True)
 
@@ -63,11 +62,12 @@ if uploaded_file:
                     f"</div>",
                     unsafe_allow_html=True
                 )
-
+    
             max_n = min(len(score_data), 10)
             top_n = st.slider("Select number of top labels to show in chart", 1, max_n, 5)
+    
             top_scores_df = pd.DataFrame(score_data[:top_n], columns=["Label", "Similarity"])
-
+    
             chart = (
                 alt.Chart(top_scores_df)
                 .mark_bar(color="skyblue")
@@ -78,18 +78,24 @@ if uploaded_file:
                 )
                 .properties(height=top_n * 40)
             )
-
+    
             st.altair_chart(chart, use_container_width=True)
-
-        # Feedback Section
-        st.markdown("### 📝 Confirm/Correct label and describe:")
+    
+        # Threshold to decide low confidence
+        threshold = 0.20
+        if confidence_score < threshold:
+            st.warning("Low confidence in prediction. Please help us label this image.")
+        else:
+            st.success(f"Prediction: **{predicted_label}** (confidence: {confidence_score:.2f})")
+    
+        st.markdown("### 📝 Please confirm or correct the label and provide a description:")
         user_label = st.selectbox("Select or confirm a label", label_prompts, index=top_idx)
         user_description = st.text_area("Describe the image")
-
+    
         if st.button("Submit"):
             os.makedirs("saved_images", exist_ok=True)
             os.makedirs("saved_data", exist_ok=True)
-
+    
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             image_filename = f"{user_label}_{timestamp}.png"
             image_save_path = os.path.join("saved_images", image_filename)
@@ -103,18 +109,9 @@ if uploaded_file:
                 "predicted_confidence": confidence_score,
                 "image_filename": image_filename
             }
-
+    
             metadata_path = os.path.join("saved_data", f"{user_label}_{timestamp}.json")
             with open(metadata_path, "w") as f:
                 json.dump(metadata, f, indent=4)
-
-            st.success("Image and metadata saved. Thank you!")
-
-    # --- YOLOv11 Detection ---
-    st.markdown("## 🕵️ Object Detection using YOLOv11")
-    with st.spinner("Running object detection..."):
-        results = yolo_model(image)
-        results_image_path = "temp_detected.jpg"
-        results[0].save(filename=results_image_path)  # Save annotated result image
-
-        st.image(results_image_path, caption="YOLOv11 Detection Output", use_column_width=True)
+    
+            st.success("Image and metadata saved. Thank you for your help!")
