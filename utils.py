@@ -1,7 +1,7 @@
 import torch
 import open_clip
 from PIL import Image
-from torchvision import transforms
+
 
 # Load OpenCLIP model
 def load_model():
@@ -9,17 +9,24 @@ def load_model():
     tokenizer = open_clip.get_tokenizer('ViT-B-32')
     return model, preprocess, tokenizer
 
-# Compute similarity
-def compute_similarity(model, tokenizer, preprocess, image, texts):
-    image_input = preprocess(image).unsqueeze(0)
-    text_tokens = tokenizer(texts)
+def compute_similarity(image, label_prompts, model, preprocess, tokenizer):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = model.to(device)
+
+    # Correct way: apply the preprocessing transform to the image
+    image_input = preprocess(image).unsqueeze(0).to(device)  # Shape: [1, 3, H, W]
 
     with torch.no_grad():
         image_features = model.encode_image(image_input)
-        text_features = model.encode_text(text_tokens)
-
         image_features /= image_features.norm(dim=-1, keepdim=True)
+
+        # Tokenize all labels and encode
+        text_inputs = tokenizer(label_prompts).to(device)
+        text_features = model.encode_text(text_inputs)
         text_features /= text_features.norm(dim=-1, keepdim=True)
 
-        similarity = (100.0 * image_features @ text_features.T).squeeze(0)
-    return similarity.tolist()
+        # Compute cosine similarity
+        similarities = (image_features @ text_features.T).squeeze(0)  # Shape: [num_labels]
+
+    return similarities
+
