@@ -28,8 +28,11 @@ if uploaded_file:
     st.image(image, caption="Uploaded Image", use_column_width=True)
 
     similarities = compute_similarity(image, label_prompts, model, preprocess, tokenizer)
-    top_idx = similarities.argmax()
+    top_idx = similarities.argmax().item()  # ✅ convert to plain int
     predicted_label = label_prompts[top_idx]
+
+    
+
     confidence_score = similarities[top_idx].item()
 
     st.markdown("### 🔍 Predicted Label:")
