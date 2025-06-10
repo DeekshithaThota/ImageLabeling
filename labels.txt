@@ -8,5 +8,7 @@ a car partially visible
 part of car visible in corner
 car on tow vehicle
 damaged car
+truck
+seats of a car
 non-car image/non-document image
 
