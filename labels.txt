@@ -2,7 +2,7 @@ car
 document
 front view of car
 rear view of car
-a close-up image of car
+a zoomed in image of car
 side view of car
 a car partially visible
 car on tow vehicle
