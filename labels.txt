@@ -15,5 +15,5 @@ Dashboard of car
 steering wheel of car
 non-car image/non-document image
 non-car/non-document object
-object resembling car/carparts but not a car/carpart
-object resembling document but not a document
+non-car object resembling car/carparts
+non-document object resembling document
