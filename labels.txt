@@ -18,3 +18,4 @@ non-car/non-document object
 non-car object resembling car/carparts
 non-document object resembling document
 a far-away image of car
+car image with other cars in background
