@@ -4,7 +4,6 @@ front view of car
 rear view of car
 a zoomed in image of car
 side view of car
-a car partially visible
 car on tow vehicle
 damaged car
 truck
@@ -15,4 +14,7 @@ car engine exposed
 Dashboard of car
 steering wheel of car
 non-car image/non-document image
+non-car/non-document object
+object resembling car/carparts but not a car/carpart
+
 
