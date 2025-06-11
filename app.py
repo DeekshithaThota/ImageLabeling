@@ -55,8 +55,6 @@ if uploaded_file:
         st.markdown(
             f"<div style='background-color:#E0F7FA;padding:12px;border-radius:10px;font-size:20px;'>"
             f"<b>Predicted Category:</b> {predicted_category.title()}<br>"
-            f"<b>Top Matching Prompt:</b> {label_prompts[top_idx]}<br>"
-            f"<b>Confidence Score:</b> {confidence_score:.3f}"
             f"</div>",
             unsafe_allow_html=True
         )
