@@ -4,6 +4,7 @@ from PIL import Image
 from utils import load_model, compute_similarity
 import pandas as pd
 import torch.nn.functional as F
+import torch
 
 # Streamlit setup
 st.set_page_config(page_title="Vehicle/Document Classifier", layout="wide")
