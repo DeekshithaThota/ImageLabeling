@@ -67,9 +67,9 @@ if uploaded_file:
         # Prepare scores by category
         score_data = list(zip(label_prompts, similarities.tolist()))
         
-        vehicle_scores = [(label_prompts[i], similarities[i].item()) for i in vehicle_range]
-        document_scores = [(label_prompts[i], similarities[i].item()) for i in document_range]
-        other_scores = [(label_prompts[i], similarities[i].item()) for i in other_range]
+        vehicle_scores = [('vehicle', label_prompts[i], similarities[i].item()) for i in vehicle_range]
+        document_scores = [('document', label_prompts[i], similarities[i].item()) for i in document_range]
+        other_scores = [('other', label_prompts[i], similarities[i].item()) for i in other_range]
 
         top_vehicle = sorted(vehicle_scores, key = lambda x : x[1], reverse= True )[:1]
         top_document = sorted(document_scores, key = lambda x : x[1], reverse= True )[:1]
@@ -78,7 +78,7 @@ if uploaded_file:
         
         def render_score_table(score_list, title):
             score_list = sorted(score_list, key=lambda x: x[1], reverse=True)
-            df = pd.DataFrame(score_list, columns=["Prompt", "Similarity"])
+            df = pd.DataFrame(score_list, columns=["Category", "Prompt", "Similarity"])
             st.markdown(f"**Top {title} Prompts:**")
             st.dataframe(df, use_container_width=True)
 
