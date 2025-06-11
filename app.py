@@ -3,6 +3,7 @@ import os
 from PIL import Image
 from utils import load_model, compute_similarity
 import pandas as pd
+import torch.nn.Functional as F
 
 # Streamlit setup
 st.set_page_config(page_title="Vehicle/Document Classifier", layout="wide")
@@ -69,13 +70,15 @@ if uploaded_file:
         document_scores = [('document', label_prompts[i], similarities[i].item()) for i in document_range]
         other_scores = [('other', label_prompts[i], similarities[i].item()) for i in other_range]
 
-        top_vehicle = sorted(vehicle_scores, key = lambda x : x[1], reverse= True )[:1]
-        top_document = sorted(document_scores, key = lambda x : x[1], reverse= True )[:1]
-        top_other = sorted(other_scores, key = lambda x : x[1], reverse= True )[:1]
+        
+
+        top_vehicle = sorted(vehicle_scores, key = lambda x : x[2], reverse= True )[:2]
+        top_document = sorted(document_scores, key = lambda x : x[2], reverse= True )[:2]
+        top_other = sorted(other_scores, key = lambda x : x[2], reverse= True )[:2]
 
         
         def render_score_table(score_list, title):
-            score_list = sorted(score_list, key=lambda x: x[1], reverse=True)
+            score_list = sorted(score_list, key=lambda x: x[2], reverse=True)
             df = pd.DataFrame(score_list, columns=["Category", "Prompt", "Similarity"])
             st.markdown(f"**Top {title} Prompts:**")
             st.dataframe(df, use_container_width=True)
