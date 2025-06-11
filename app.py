@@ -103,7 +103,6 @@ if uploaded_file:
             ]
             
             df = pd.DataFrame(combined_top_softmax, columns=["Category", "Prompt", "Similarity", "Softmax"])
-            selected_prompt = st.selectbox("Top 1 Prompt from Each Category with Softmax Scores", df["Prompt"])
             st.dataframe(df, use_container_width=True)
 
 
