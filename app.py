@@ -81,6 +81,16 @@ if uploaded_file:
         top_document = sorted(document_scores, key = lambda x : x[2], reverse= True )[:1]
         top_other = sorted(other_scores, key = lambda x : x[2], reverse= True )[:1]
 
+        # Step 2: Combine and apply softmax on top similarities
+        combined_top = top_vehicle + top_document + top_other
+        top_similarities = torch.tensor([entry[2] for entry in combined_top])
+        top_softmax = F.softmax(top_similarities * 100, dim=0).tolist()
+        
+        # Step 3: Get predicted category from softmax
+        max_softmax = max(top_softmax)
+        max_index = top_softmax.index(max_softmax)
+        predicted_category = combined_top[max_index][0] if max_softmax >= 0.80 else "ambiguous"
+
         
         # Updated render_score_table to optionally show softmax
         def render_score_table(score_list, title, show_softmax=False):
@@ -91,14 +101,6 @@ if uploaded_file:
             st.dataframe(df, use_container_width=True)
         
         with st.expander("Top Prompt from Each Category"):
-            combined_top = top_vehicle + top_document + top_other
-            
-            # Extract only similarity scores
-            top_similarities = torch.tensor([entry[2] for entry in combined_top])
-            
-            # Apply softmax on top similarities
-            top_softmax = F.softmax(top_similarities*100, dim=0).tolist()
-            
             # Add softmax to combined_top entries
             combined_top_softmax = [
                 (entry[0], entry[1], entry[2], round(softmax_score, 4))
