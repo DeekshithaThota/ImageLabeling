@@ -80,7 +80,7 @@ if uploaded_file:
         
         def render_score_table(score_list, title):
             score_list = sorted(score_list, key=lambda x: x[2], reverse=True)
-            df = pd.DataFrame(score_list, columns=["Category", "Prompt", "Similarity"])
+            df = pd.DataFrame(score_list, columns=["Category", "Prompt", "Similarity", "Softmax"])
             st.markdown(f"**Top {title} Prompts:**")
             st.dataframe(df, use_container_width=True)
 
