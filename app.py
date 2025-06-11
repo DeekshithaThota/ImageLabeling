@@ -94,7 +94,7 @@ if uploaded_file:
             top_similarities = torch.tensor([entry[2] for entry in combined_top])
             
             # Apply softmax on top similarities
-            top_softmax = F.softmax(top_similarities, dim=0).tolist()
+            top_softmax = F.softmax(top_similarities*100, dim=0).tolist()
             
             # Add softmax to combined_top entries
             combined_top_softmax = [
