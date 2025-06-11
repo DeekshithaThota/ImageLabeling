@@ -69,8 +69,11 @@ if uploaded_file:
         score_data = list(zip(label_prompts, similarities.tolist()))
         
         vehicle_scores = [('vehicle', label_prompts[i], similarities[i].item()) for i in vehicle_range]
+        vehicle_scores = sorted(vehicle_scores, key = lambda x : x[2], reverse= True )
         document_scores = [('document', label_prompts[i], similarities[i].item()) for i in document_range]
+        document_scores = sorted(document_scores, key = lambda x : x[2], reverse= True )
         other_scores = [('other', label_prompts[i], similarities[i].item()) for i in other_range]
+        other_scores = sorted(other_scores, key = lambda x : x[2], reverse= True )
 
         
 
