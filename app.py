@@ -3,7 +3,7 @@ import os
 from PIL import Image
 from utils import load_model, compute_similarity
 import pandas as pd
-import torch.nn.Functional as F
+import torch.nn.functional as F
 
 # Streamlit setup
 st.set_page_config(page_title="Vehicle/Document Classifier", layout="wide")
