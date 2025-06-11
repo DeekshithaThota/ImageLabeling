@@ -1,19 +1,34 @@
-car
-document
-front view of car
-rear view of car
-a zoomed in image of car
-side view of car
-car on tow vehicle
-damaged car
-truck
-seats of a car
-car bumper
+a clear photo of a full car
+truck wheel and back light
 car wheel
+truck rear view
+car picture in  mobile
+front view of car
+side view of car
+picture of car in back angle
+a photo of a car
+a car bumper or wheel
+damaged car/vehicle
+Car on tow vehicle
+A car
+A truck
+An ATV vehicle
+A motorcycle or motorbike
+Dashboard of a car
+steering wheel inside a car
+seats inside of a car
+car hood or trunk
+a parked vehicle on the street
 car engine exposed
-Dashboard of car
-steering wheel of car
-non-car image/non-document image
+car/vehicle tires or wheels
+front view of car
+a scanned document with text
+an image of document containing text
+document
+a picture without car and without document
+a picture of person or hand or legs
+a signature without any text
+empty street
+empty
 non-car/non-document object
-
-car image with other cars in background
+non-car/non-document image
