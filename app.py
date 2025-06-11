@@ -48,7 +48,7 @@ if uploaded_file:
 
     with col2:
         similarities = compute_similarity(image, label_prompts, model, preprocess, tokenizer)
-        similarities_softmax = F.softmax(similarities, dim = 0)
+        #similarities_softmax = F.softmax(similarities, dim = 0)
         top_idx = similarities.argmax().item()
         confidence_score = similarities[top_idx].item()
         predicted_category = classify_index(top_idx, confidence_score)
@@ -67,9 +67,9 @@ if uploaded_file:
         # Prepare scores by category
         score_data = list(zip(label_prompts, similarities.tolist()))
         
-        vehicle_scores = [('vehicle', label_prompts[i], similarities[i].item(), similarities_softmax[i].item()) for i in vehicle_range]
-        document_scores = [('document', label_prompts[i], similarities[i].item(), similarities_softmax[i].item()) for i in document_range]
-        other_scores = [('other', label_prompts[i], similarities[i].item(), similarities_softmax[i].item()) for i in other_range]
+        vehicle_scores = [('vehicle', label_prompts[i], similarities[i].item()) for i in vehicle_range]
+        document_scores = [('document', label_prompts[i], similarities[i].item()) for i in document_range]
+        other_scores = [('other', label_prompts[i], similarities[i].item()) for i in other_range]
 
         
 
@@ -78,15 +78,33 @@ if uploaded_file:
         top_other = sorted(other_scores, key = lambda x : x[2], reverse= True )[:1]
 
         
-        def render_score_table(score_list, title):
-            score_list = sorted(score_list, key=lambda x: x[2], reverse=True)
-            df = pd.DataFrame(score_list, columns=["Category", "Prompt", "Similarity", "Softmax"])
+        # Updated render_score_table to optionally show softmax
+        def render_score_table(score_list, title, show_softmax=False):
+            df = pd.DataFrame(score_list, columns=["Category", "Prompt", "Similarity"])
+            if show_softmax:
+                df["Softmax"] = df["Similarity"].apply(lambda x: round(x, 4))  # placeholder, replaced later
             st.markdown(f"**Top {title} Prompts:**")
             st.dataframe(df, use_container_width=True)
-
+        
         with st.expander("Top Prompt from Each Category"):
             combined_top = top_vehicle + top_document + top_other
-            render_score_table(combined_top, "Top 1 per Category")
+            
+            # Extract only similarity scores
+            top_similarities = torch.tensor([entry[2] for entry in combined_top])
+            
+            # Apply softmax on top similarities
+            top_softmax = F.softmax(top_similarities, dim=0).tolist()
+            
+            # Add softmax to combined_top entries
+            combined_top_softmax = [
+                (entry[0], entry[1], entry[2], round(softmax_score, 4))
+                for entry, softmax_score in zip(combined_top, top_softmax)
+            ]
+            
+            df = pd.DataFrame(combined_top_softmax, columns=["Category", "Prompt", "Similarity", "Softmax"])
+            selected_prompt = st.selectbox("Top 1 Prompt from Each Category with Softmax Scores", df["Prompt"])
+            st.dataframe(df, use_container_width=True)
+
 
         with st.expander("🚘 Vehicle Similarities"):
             render_score_table(vehicle_scores, "Vehicle")
