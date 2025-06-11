@@ -82,7 +82,7 @@ if uploaded_file:
             st.markdown(f"**Top {title} Prompts:**")
             st.dataframe(df, use_container_width=True)
 
-        with st.expander("Top Prompt from Each Category):
+        with st.expander("Top Prompt from Each Category"):
             combined_top = top_vehicle + top_document + top_other
             render_score_table(combined_top, "Top 1 per Category")
 
