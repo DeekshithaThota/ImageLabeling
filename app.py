@@ -54,16 +54,7 @@ if uploaded_file:
         confidence_score = similarities[top_idx].item()
         predicted_category = classify_index(top_idx, confidence_score)
 
-        st.markdown("### 🔍 Prediction Result:")
-        st.markdown(
-            f"<div style='background-color:#E0F7FA;padding:12px;border-radius:10px;font-size:20px;'>"
-            f"<b>Predicted Category:</b> {predicted_category.title()}<br>"
-            f"</div>",
-            unsafe_allow_html=True
-        )
-
-        # --- Show Similarities ---
-        st.markdown("### 📊 Show Category-wise Similarities")
+        
 
         # Prepare scores by category
         score_data = list(zip(label_prompts, similarities.tolist()))
@@ -91,7 +82,16 @@ if uploaded_file:
         max_index = top_softmax.index(max_softmax)
         predicted_category = combined_top[max_index][0] if max_softmax >= 0.80 else "ambiguous"
 
-        
+        st.markdown("### 🔍 Prediction Result:")
+        st.markdown(
+            f"<div style='background-color:#E0F7FA;padding:12px;border-radius:10px;font-size:20px;'>"
+            f"<b>Predicted Category:</b> {predicted_category.title()}<br>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+
+        # --- Show Similarities ---
+        st.markdown("### 📊 Show Category-wise Similarities")
         # Updated render_score_table to optionally show softmax
         def render_score_table(score_list, title, show_softmax=False):
             df = pd.DataFrame(score_list, columns=["Category", "Prompt", "Similarity"])
