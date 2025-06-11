@@ -25,7 +25,7 @@ front view of car
 a scanned document with text
 an image of document containing text
 document
-a picture without car and without document
+
 a picture of person or hand or legs
 a signature without any text
 empty street
