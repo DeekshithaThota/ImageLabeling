@@ -72,9 +72,9 @@ if uploaded_file:
 
         
 
-        top_vehicle = sorted(vehicle_scores, key = lambda x : x[2], reverse= True )[:2]
-        top_document = sorted(document_scores, key = lambda x : x[2], reverse= True )[:2]
-        top_other = sorted(other_scores, key = lambda x : x[2], reverse= True )[:2]
+        top_vehicle = sorted(vehicle_scores, key = lambda x : x[2], reverse= True )[:1]
+        top_document = sorted(document_scores, key = lambda x : x[2], reverse= True )[:1]
+        top_other = sorted(other_scores, key = lambda x : x[2], reverse= True )[:1]
 
         
         def render_score_table(score_list, title):
