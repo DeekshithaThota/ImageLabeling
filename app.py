@@ -48,6 +48,7 @@ if uploaded_file:
 
     with col2:
         similarities = compute_similarity(image, label_prompts, model, preprocess, tokenizer)
+        similarities_softmax = F.softmax(similarities, dim = 0)
         top_idx = similarities.argmax().item()
         confidence_score = similarities[top_idx].item()
         predicted_category = classify_index(top_idx, confidence_score)
@@ -66,9 +67,9 @@ if uploaded_file:
         # Prepare scores by category
         score_data = list(zip(label_prompts, similarities.tolist()))
         
-        vehicle_scores = [('vehicle', label_prompts[i], similarities[i].item()) for i in vehicle_range]
-        document_scores = [('document', label_prompts[i], similarities[i].item()) for i in document_range]
-        other_scores = [('other', label_prompts[i], similarities[i].item()) for i in other_range]
+        vehicle_scores = [('vehicle', label_prompts[i], similarities[i].item(), similarities_softmax[i].item()) for i in vehicle_range]
+        document_scores = [('document', label_prompts[i], similarities[i].item(), similarities_softmax[i].item()) for i in document_range]
+        other_scores = [('other', label_prompts[i], similarities[i].item(), similarities_softmax[i].item()) for i in other_range]
 
         
 
