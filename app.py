@@ -1,13 +1,11 @@
 import streamlit as st
 import os
-import json
 from PIL import Image
-from datetime import datetime
 from utils import load_model, compute_similarity
 import pandas as pd
-import altair as alt
 
-st.set_page_config(page_title="Vehicle / Document Classifier", layout="wide")
+# Streamlit setup
+st.set_page_config(page_title="Vehicle/Document Classifier", layout="wide")
 
 @st.cache_resource(show_spinner="Loading OpenCLIP model...")
 def get_cached_model():
@@ -19,10 +17,12 @@ model, preprocess, tokenizer = get_cached_model()
 with open("labels.txt", "r") as f:
     label_prompts = [line.strip() for line in f.readlines()]
 
-vehicle_range = range(0, 24)  # First 24 are vehicle prompts
-document_range = range(24, 27)  # Next 3 are documents
-other_range = range(27, len(label_prompts))  # Rest are others
+# Define category ranges
+vehicle_range = range(0, 24)
+document_range = range(24, 27)
+other_range = range(27, len(label_prompts))
 
+# Classification logic
 def classify_index(idx, score, threshold=0.225):
     if score < threshold:
         return "ambiguous"
@@ -33,7 +33,8 @@ def classify_index(idx, score, threshold=0.225):
     else:
         return "others"
 
-st.title("🚘📄 Vehicle/Document/OpenCLIP Image Classifier")
+# Title
+st.title("🚘📄 Vehicle/Document/OpenCLIP Classifier")
 
 uploaded_file = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
 
@@ -53,61 +54,34 @@ if uploaded_file:
         st.markdown("### 🔍 Prediction Result:")
         st.markdown(
             f"<div style='background-color:#E0F7FA;padding:12px;border-radius:10px;font-size:20px;'>"
-            f"<b>Category:</b> {predicted_category.title()}<br>"
-            f"<b>Top Prompt:</b> {label_prompts[top_idx]}<br>"
-            f"<b>Confidence:</b> {confidence_score:.3f}"
+            f"<b>Predicted Category:</b> {predicted_category.title()}<br>"
+            f"<b>Top Matching Prompt:</b> {label_prompts[top_idx]}<br>"
+            f"<b>Confidence Score:</b> {confidence_score:.3f}"
             f"</div>",
             unsafe_allow_html=True
         )
 
-        with st.expander("📊 Show All Similarity Scores"):
-            score_data = list(zip(label_prompts, similarities.tolist()))
-            score_data.sort(key=lambda x: x[1], reverse=True)
+        # --- Show Similarities ---
+        st.markdown("### 📊 Show Category-wise Similarities")
 
-            max_n = min(len(score_data), 10)
-            top_n = st.slider("Select number of top labels to show in chart", 1, max_n, 5)
-            top_scores_df = pd.DataFrame(score_data[:top_n], columns=["Label", "Similarity"])
+        # Prepare scores by category
+        score_data = list(zip(label_prompts, similarities.tolist()))
+        
+        vehicle_scores = [(label_prompts[i], similarities[i].item()) for i in vehicle_range]
+        document_scores = [(label_prompts[i], similarities[i].item()) for i in document_range]
+        other_scores = [(label_prompts[i], similarities[i].item()) for i in other_range]
 
-            chart = (
-                alt.Chart(top_scores_df)
-                .mark_bar(color="steelblue")
-                .encode(
-                    x=alt.X("Similarity:Q", scale=alt.Scale(domain=[0, 1])),
-                    y=alt.Y("Label:N", sort="-x"),
-                    tooltip=["Label", "Similarity"]
-                )
-                .properties(height=top_n * 40)
-            )
+        def render_score_table(score_list, title):
+            score_list = sorted(score_list, key=lambda x: x[1], reverse=True)
+            df = pd.DataFrame(score_list, columns=["Prompt", "Similarity"])
+            st.markdown(f"**Top {title} Prompts:**")
+            st.dataframe(df, use_container_width=True)
 
-            st.altair_chart(chart, use_container_width=True)
+        with st.expander("🚘 Vehicle Similarities"):
+            render_score_table(vehicle_scores, "Vehicle")
 
-        # Confirm/correct label
-        st.markdown("### 📝 Confirm or Correct Label and Describe:")
-        user_label = st.selectbox("Label", ["vehicle", "document", "others", "ambiguous"], index=["vehicle", "document", "others", "ambiguous"].index(predicted_category))
-        user_description = st.text_area("Describe this image (optional):")
+        with st.expander("📄 Document Similarities"):
+            render_score_table(document_scores, "Document")
 
-        if st.button("Submit"):
-            os.makedirs("saved_images", exist_ok=True)
-            os.makedirs("saved_data", exist_ok=True)
-
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            image_filename = f"{user_label}_{timestamp}.png"
-            image_save_path = os.path.join("saved_images", image_filename)
-            image.save(image_save_path)
-
-            metadata = {
-                "label": user_label,
-                "description": user_description,
-                "timestamp": timestamp,
-                "predicted_label": predicted_category,
-                "predicted_prompt": label_prompts[top_idx],
-                "predicted_confidence": confidence_score,
-                "image_filename": image_filename
-            }
-
-            metadata_path = os.path.join("saved_data", f"{user_label}_{timestamp}.json")
-            with open(metadata_path, "w") as f:
-                json.dump(metadata, f, indent=4)
-
-            st.success("✅ Image and feedback saved!")
-
+        with st.expander("🌀 Others Similarities"):
+            render_score_table(other_scores, "Others")
